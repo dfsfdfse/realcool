@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="per.real.cool.module.system.dao.OfficeDao">
+    <sql id="column">
+        a.id,
+        a.parent_id,
+        a.parent_ids,
+        a.name,
+        a.sort,
+        a.email,
+        a.phone,
+        a.principal AS "principal.id",
+        pr.username AS "principal.username",
+        a.del_flag AS "delFlag",
+        a.create_time,
+        a.create_by AS "createBy.id",
+        a.update_time,
+        a.update_by AS "updateBy.id"
+    </sql>
+
+    <sql id="join">
+        LEFT JOIN sys_user pr ON pr.id = a.principal
+    </sql>
+
+    <select id="get" resultType="SysOffice">
+        SELECT
+        <include refid="column"/>
+        FROM sys_office a
+        <include refid="join"/>
+        <where>
+            a.id = #{id}
+        </where>
+    </select>
+
+    <select id="findList" resultType="SysOffice">
+        SELECT
+        <include refid="column"/>
+        FROM sys_office a
+        <include refid="join"/>
+        <where>
+            a.del_flag = #{DEFAULT_DEL}
+            <if test="name != null and name != ''">
+                AND a.name = #{name}
+            </if>
+        </where>
+    </select>
+    <select id="findAllList" resultType="SysOffice">
+        SELECT
+        <include refid="column"/>
+        FROM sys_office a
+        <include refid="join"/>
+    </select>
+
+    <select id="findByParentIds" resultType="SysOffice">
+        SELECT
+        <include refid="column"/>
+        FROM sys_office a
+        <include refid="join"/>
+        <where>
+            a.del_flag = #{DEFAULT_DEL}
+            <if test="parentIds != null and parentIds != ''">
+                AND a.parentIds = #{parentIds}
+            </if>
+        </where>
+    </select>
+
+    <select id="findByParentIdsLike" resultType="SysOffice">
+        SELECT
+        <include refid="column"/>
+        FROM sys_office a
+        <include refid="join"/>
+        <where>
+            a.del_flag = #{DEFAULT_DEL}
+            <if test="parentIds != null and parentIds != ''">
+                AND a.parentIds LIKE CONCAT(#{parentIds},'%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO sys_office(id, name, sort, email , phone, principal, del_flag, create_time,create_by,update_time,update_by)
+        VALUES (#{id}, #{name}, #{sort}, #{email} , #{phone}, #{principal}, #{delFlag},#{createTime},#{createBy.id},#{updateTime},#{updateBy.id})
+    </insert>
+
+    <update id="update">
+        UPDATE sys_office
+        SET id          = #{id},
+            name        = #{name},
+            sort        = #{sort},
+            email       = #{email},
+            phone       = #{phone},
+            principal   = #{principal},
+            del_flag    = #{delFlag},
+            create_time = #{createTime},
+            create_by   = #{createBy.id},
+            update_time = #{updateTime},
+            update_by   = #{updateBy.id}
+    </update>
+
+    <update id="delete">
+        UPDATE sys_office SET del_flag = #{IS_DELETE}
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteByIds">
+        UPDATE sys_office SET del_flag = #{IS_DELETE}
+        <where>
+            id in
+            <foreach collection="list" close=")" separator="," item="data" open="(">
+                #{data}
+            </foreach>
+        </where>
+    </update>
+</mapper>

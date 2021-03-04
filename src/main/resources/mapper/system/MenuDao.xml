@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="per.real.cool.module.system.dao.MenuDao">
+    <sql id="column">
+        a.id,
+        a.parent_id,
+        a.parent_ids,
+        a.name,
+        a.type,
+        a.permission,
+        a.url,
+        a.icon,
+        a.show,
+        a.sort,
+        a.del_flag AS "delFlag",
+        a.create_time,
+        a.create_by AS "createBy.id",
+        a.update_time,
+        a.update_by AS "updateBy.id"
+    </sql>
+
+    <sql id="join">
+
+    </sql>
+
+    <select id="get" resultType="SysOffice">
+        SELECT
+        <include refid="column"/>
+        FROM sys_menu a
+        <include refid="join"/>
+        <where>
+            <if test="id != null and id != ''">
+                AND a.id = #{id}
+            </if>
+            <if test="name != null and name != ''">
+                AND a.name = #{name}
+            </if>
+        </where>
+    </select>
+
+    <select id="findList" resultType="SysOffice">
+        SELECT
+        <include refid="column"/>
+        FROM sys_menu a
+        <include refid="join"/>
+        <where>
+            a.del_flag = #{DEFAULT_DEL}
+            <if test="name != null and name != ''">
+                AND a.name = #{name}
+            </if>
+        </where>
+    </select>
+    <select id="findAllList" resultType="SysOffice">
+        SELECT
+        <include refid="column"/>
+        FROM sys_menu a
+        <include refid="join"/>
+    </select>
+
+    <select id="findByParentIds" resultType="SysOffice">
+        SELECT
+        <include refid="column"/>
+        FROM sys_menu a
+        <include refid="join"/>
+        <where>
+            a.del_flag = #{DEFAULT_DEL}
+            <if test="parentIds != null and parentIds != ''">
+                AND a.parentIds = #{parentIds}
+            </if>
+        </where>
+    </select>
+
+    <select id="findByParentIdsLike" resultType="SysOffice">
+        SELECT
+        <include refid="column"/>
+        FROM sys_menu a
+        <include refid="join"/>
+        <where>
+            a.del_flag = #{DEFAULT_DEL}
+            <if test="parentIds != null and parentIds != ''">
+                AND a.parentIds LIKE CONCAT(#{parentIds},'%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO sys_menu(id, name, type, permission, icon, show, url, sort, del_flag, create_time,create_by,update_time,update_by)
+        VALUES (#{id}, #{name},#{type},#{permission},#{icon},#{show},#{url}, #{sort}, #{delFlag},#{createTime},#{createBy.id},#{updateTime},#{updateBy.id})
+    </insert>
+
+    <update id="update">
+        UPDATE sys_menu
+        SET id          = #{id},
+            name        = #{name},
+            permission  = #{permission},
+            icon        = #{icon},
+            url         = #{url},
+            show        = #{show},
+            type        = #{type},
+            sort        = #{sort},
+            del_flag    = #{delFlag},
+            create_time = #{createTime},
+            create_by   = #{createBy.id},
+            update_time = #{updateTime},
+            update_by   = #{updateBy.id}
+    </update>
+
+    <update id="delete">
+        UPDATE sys_menu SET del_flag = #{IS_DELETE}
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteByIds">
+        UPDATE sys_menu SET del_flag = #{IS_DELETE}
+        <where>
+            id in
+            <foreach collection="list" close=")" separator="," item="data" open="(">
+                #{data}
+            </foreach>
+        </where>
+    </update>
+</mapper>

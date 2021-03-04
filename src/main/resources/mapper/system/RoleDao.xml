@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="per.real.cool.module.system.dao.RoleDao">
+    <resultMap id="roleMap" type="SysRole">
+        <id     column="id"         property="id"/>
+        <result column="name"       property="name"/>
+        <result column="dataScope"  property="dataScope"/>
+        <result column="delFlag"    property="delFlag"/>
+        <result column="sort"       property="sort"/>
+        <result column="createTime" property="createTime"/>
+        <result column="updateTime" property="updateTime"/>
+        <association property="createBy" column="createBy" javaType="SysUser">
+            <id column="createBy.id" property="id"/>
+        </association>
+        <association property="updateBy" column="updateBy" javaType="SysUser">
+            <id column="updateBy.id" property="id"/>
+        </association>
+        <collection property="customScope" column="customScope" ofType="SysOffice">
+            <id column="customScope.id" property="id"/>
+            <result column="customScope.name" property="name"/>
+        </collection>
+    </resultMap>
+
+    <sql id="column">
+        a.id,
+        a.name,
+        a.data_scope,
+        so.id AS "customScope.id",
+        so.name AS "customScope.name",
+        a.sort,
+        a.del_flag,
+        a.create_time,
+        a.create_by AS "createBy.id",
+        a.update_time,
+        a.update_by AS "updateBy.id"
+    </sql>
+
+    <sql id="join">
+        LEFT JOIN sys_role_data_scope datascope ON datascope.role_id = a.id
+        LEFT JOIN sys_office so ON so.id = datascope.office_id
+    </sql>
+
+    <select id="get" resultMap="roleMap">
+        SELECT
+        <include refid="column"/>
+        FROM sys_role a
+        <include refid="join"/>
+        <where>
+            a.id = #{id}
+        </where>
+    </select>
+
+    <select id="findList" resultMap="roleMap">
+        SELECT
+        <include refid="column"/>
+        FROM sys_role a
+        <include refid="join"/>
+        <where>
+            del_flag = #{DEFAULT_DEL}
+            <if test="username != null and username != ''">
+                AND username = #{username}
+            </if>
+            <if test="sex != null and sex != ''">
+                AND sex = #{sex}
+            </if>
+            <if test="address != null and address != ''">
+                AND address LIKE CONCAT(#{address},'%')
+            </if>
+        </where>
+    </select>
+    <select id="findAllList" resultMap="roleMap">
+        SELECT
+        <include refid="column"/>
+        FROM sys_role a
+        <include refid="join"/>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO sys_user(id, name, data_scope, del_flag, sort,create_time,create_by,update_time,update_by)
+        VALUES (#{id}, #{name}, #{dataScope},#{delFlag}.#{sort},#{createTime},#{createBy.id},#{updateTime},#{updateBy.id})
+    </insert>
+
+    <update id="update">
+        UPDATE sys_role
+        SET id          = #{id},
+            name        = #{name},
+            data_scope  = #{dataScope},
+            sort        = #{sort},
+            del_flag    = #{delFlag},
+            create_time = #{createTime},
+            create_by   = #{createBy.id},
+            update_time = #{updateTime},
+            update_by   = #{updateBy.id}
+    </update>
+
+    <update id="delete">
+        UPDATE sys_role SET del_flag = #{IS_DELETE}
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteByIds">
+        UPDATE sys_role SET del_flag = #{IS_DELETE}
+        <where>
+            id in
+            <foreach collection="list" close=")" separator="," item="data" open="(">
+                #{data}
+            </foreach>
+        </where>
+    </update>
+</mapper>

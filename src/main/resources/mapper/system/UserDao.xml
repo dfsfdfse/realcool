@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="per.real.cool.module.system.dao.UserDao">
+    <sql id="column">
+        a.id,
+        a.name,
+        a.username,
+        a.password,
+        a.phone,
+        a.email,
+        a.sex,
+        a.address,
+        a.sort,
+        a.del_flag,
+        a.create_time,
+        a.create_by AS "createBy.id",
+        a.update_time,
+        a.update_by AS "updateBy.id"
+    </sql>
+
+    <sql id="join">
+        LEFT JOIN
+    </sql>
+
+    <select id="get" resultType="SysUser">
+        SELECT
+        <include refid="column"/>
+        FROM sys_user a
+        <include refid="join"/>
+        <where>
+            <if test="id != null and id != ''">
+                AND id = #{id}
+            </if>
+            <if test="name != null and name != ''">
+                AND name = #{name}
+            </if>
+            <if test="username != null and username != ''">
+                AND username = #{username}
+            </if>
+            <if test="sex != null and sex != ''">
+                AND sex = #{sex}
+            </if>
+            <if test="address != null and address != ''">
+                AND address LIKE CONCAT(#{address},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="findList" resultType="SysUser">
+        SELECT
+        <include refid="column"/>
+        FROM sys_user a
+        <include refid="join"/>
+        <where>
+            del_flag = #{DEFAULT_DEL}
+            <if test="name != null and name != ''">
+                AND name = #{name}
+            </if>
+            <if test="username != null and username != ''">
+                AND username = #{username}
+            </if>
+            <if test="sex != null and sex != ''">
+                AND sex = #{sex}
+            </if>
+            <if test="address != null and address != ''">
+                AND address LIKE CONCAT(#{address},'%')
+            </if>
+        </where>
+    </select>
+    <select id="findAllList" resultType="SysUser">
+        SELECT
+        <include refid="column"/>
+        FROM sys_user a
+        <include refid="join"/>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO sys_user(id, name, username, password, sex, phone, email, address, del_flag, sort,create_time,create_by,update_time,update_by)
+        VALUES (#{id},#{name}, #{username}, #{password},#{sex},#{phone},#{email},#{address}, #{delFlag}.#{sort},#{createTime},#{createBy.id},#{updateTime},#{updateBy.id})
+    </insert>
+
+    <update id="update">
+        UPDATE sys_user
+        SET id          = #{id},
+            name        = #{name},
+            username    = #{username},
+            password    = #{password},
+            sex         = #{sex},
+            phone       = #{phone},
+            email       = #{email},
+            address     = #{address},
+            sort        = #{sort},
+            del_flag    = #{delFlag},
+            create_time = #{createTime},
+            create_by   = #{createBy.id},
+            update_time = #{updateTime},
+            update_by   = #{updateBy.id}
+    </update>
+
+    <update id="delete">
+        UPDATE sys_user SET del_flag = #{IS_DELETE}
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteByIds">
+        UPDATE sys_user SET del_flag = #{IS_DELETE}
+        <where>
+            id in
+            <foreach collection="list" close=")" separator="," item="data" open="(">
+                #{data}
+            </foreach>
+        </where>
+    </update>
+</mapper>
